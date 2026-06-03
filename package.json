@@ -1,0 +1,15 @@
+{
+  "name": "mobile-ui-qa-inspector",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A minimal Figma plugin for checking basic mobile UI frame rules.",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "watch": "node scripts/watch.js"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "*",
+    "esbuild": "*",
+    "typescript": "*"
+  }
+}

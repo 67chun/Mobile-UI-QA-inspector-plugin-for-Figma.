@@ -1,0 +1,2040 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mobile UI QA Inspector</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0f1117;
+        --panel: #171a22;
+        --panel-2: #202432;
+        --panel-3: #12151d;
+        --border: #2d3342;
+        --border-soft: #252b39;
+        --text: #f5f7fa;
+        --muted: #a7afbe;
+        --weak: #737c8c;
+        --primary: #7c4dff;
+        --primary-hover: #8d63ff;
+        --orange: #ff8a3d;
+        --orange-hover: #ff9b5c;
+        --success: #20c997;
+        --warning: #f4b35e;
+        --serious: #ff5c5c;
+        --accent: #7c4dff;
+        --shadow: 0 16px 42px rgba(0, 0, 0, 0.34);
+        --shadow-soft: 0 8px 22px rgba(0, 0, 0, 0.2);
+        --focus-ring: 0 0 0 2px rgba(124, 77, 255, 0.2);
+        --glass: rgba(23, 26, 34, 0.88);
+        --glass-2: rgba(32, 36, 50, 0.82);
+        --glass-3: rgba(18, 21, 29, 0.86);
+        --glass-border: rgba(255, 255, 255, 0.08);
+        --inner-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.055), inset 0 -1px 0 rgba(0, 0, 0, 0.18);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        background: var(--bg);
+        height: 100%;
+        overflow: hidden;
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at 18% -8%, rgba(124, 77, 255, 0.1), transparent 28%),
+          radial-gradient(circle at 100% 6%, rgba(255, 138, 61, 0.07), transparent 24%),
+          var(--bg);
+        color: var(--text);
+        font-family:
+          Inter,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        font-size: 12px;
+        line-height: 1.45;
+        letter-spacing: 0;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+      }
+
+      .app {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+        gap: 6px;
+        height: 100vh;
+        width: 100%;
+        max-width: 100%;
+        min-height: 0;
+        overflow: hidden;
+        padding: 8px 9px 0;
+      }
+
+      .header {
+        border: 1px solid var(--glass-border);
+        border-radius: 9px;
+        background: var(--glass);
+        padding: 7px 10px 7px;
+        box-shadow: var(--shadow), var(--inner-highlight);
+        position: relative;
+        min-width: 0;
+        backdrop-filter: blur(10px);
+      }
+
+      .header::before {
+        content: "";
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 3px;
+        border-radius: 9px 0 0 9px;
+        background: linear-gradient(180deg, #9a7cff, var(--primary) 60%, #ff8a3d);
+      }
+
+      h1 {
+        margin: 0 0 3px;
+        color: var(--text);
+        font-size: 14px;
+        font-weight: 780;
+        letter-spacing: 0;
+        line-height: 1.25;
+      }
+
+      h2 {
+        margin: 0;
+        color: var(--text);
+        font-size: 12px;
+        font-weight: 720;
+        letter-spacing: 0;
+      }
+
+      .status {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.3;
+      }
+
+      .feedback {
+        margin: 0 0 3px;
+        color: var(--weak);
+        font-size: 12px;
+        line-height: 1.3;
+      }
+
+      .actions {
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+        margin: 0 -9px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(15, 17, 23, 0.86);
+        padding: 7px 9px 9px;
+        box-shadow: 0 -14px 26px rgba(0, 0, 0, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.045);
+        backdrop-filter: blur(12px);
+      }
+
+      #startButton {
+        width: 100%;
+        height: 36px;
+        border: 1px solid rgba(166, 138, 255, 0.42);
+        border-radius: 8px;
+        background: linear-gradient(180deg, #926cff 0%, var(--primary) 48%, #6636dd 100%);
+        color: #ffffff;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 760;
+        box-shadow:
+          0 12px 26px rgba(124, 77, 255, 0.28),
+          inset 0 1px 0 rgba(255, 255, 255, 0.22),
+          inset 0 -1px 0 rgba(0, 0, 0, 0.18);
+        transition:
+          background 120ms ease,
+          border-color 120ms ease,
+          transform 120ms ease,
+          box-shadow 120ms ease;
+      }
+
+      #startButton:hover {
+        background: linear-gradient(180deg, #9f80ff 0%, var(--primary-hover) 48%, #7041e8 100%);
+        border-color: rgba(141, 99, 255, 0.85);
+        box-shadow:
+          0 14px 30px rgba(124, 77, 255, 0.34),
+          inset 0 1px 0 rgba(255, 255, 255, 0.26),
+          inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+        transform: translateY(-1px);
+      }
+
+      #startButton:active {
+        transform: translateY(0);
+        box-shadow:
+          0 7px 18px rgba(124, 77, 255, 0.22),
+          inset 0 1px 2px rgba(0, 0, 0, 0.16);
+      }
+
+      #startButton:disabled {
+        cursor: not-allowed;
+        opacity: 0.58;
+        box-shadow: none;
+        transform: none;
+      }
+
+      .result {
+        display: grid;
+        gap: 8px;
+        margin-top: 0;
+        min-width: 0;
+      }
+
+      .content-scroll {
+        display: grid;
+        align-content: start;
+        gap: 7px;
+        min-height: 0;
+        min-width: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        padding: 0 1px 8px 0;
+        scrollbar-gutter: stable;
+      }
+
+      .panel {
+        border: 1px solid var(--glass-border);
+        border-radius: 9px;
+        background: var(--glass);
+        box-shadow: var(--shadow-soft), var(--inner-highlight);
+        overflow: hidden;
+        min-width: 0;
+        backdrop-filter: blur(8px);
+      }
+
+      .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+        background: linear-gradient(180deg, rgba(39, 44, 61, 0.78), rgba(32, 36, 50, 0.76));
+        padding: 7px 9px;
+      }
+
+      .empty {
+        margin: 0;
+        padding: 12px;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      .settings-toggle {
+        display: grid;
+        grid-template-columns: 16px minmax(0, 1fr);
+        align-items: center;
+        gap: 7px;
+        width: 100%;
+        border: 0;
+        background: var(--glass-2);
+        color: var(--text);
+        cursor: pointer;
+        padding: 9px 10px;
+        text-align: left;
+        box-shadow: var(--inner-highlight);
+        transition:
+          background 120ms ease,
+          color 120ms ease;
+      }
+
+      .settings-toggle:hover {
+        background: rgba(39, 44, 61, 0.9);
+      }
+
+      .settings-title {
+        font-size: 12px;
+        font-weight: 720;
+      }
+
+      .settings-body {
+        border-top: 1px solid rgba(255, 255, 255, 0.055);
+        padding: 9px;
+      }
+
+      .settings-grid {
+        display: grid;
+        gap: 8px;
+      }
+
+      .setting-item {
+        display: grid;
+        gap: 5px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 7px;
+        background: rgba(18, 21, 29, 0.78);
+        padding: 8px;
+        box-shadow: var(--inner-highlight);
+      }
+
+      .setting-label {
+        color: var(--text);
+        font-size: 12px;
+        font-weight: 680;
+      }
+
+      .setting-description {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .setting-input {
+        width: 100%;
+        height: 29px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 6px;
+        background: rgba(10, 12, 18, 0.7);
+        color: var(--text);
+        padding: 0 8px;
+        font-size: 12px;
+        outline: none;
+      }
+
+      .setting-input:focus {
+        border-color: rgba(124, 77, 255, 0.75);
+        box-shadow: var(--focus-ring);
+      }
+
+      .settings-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 9px;
+      }
+
+      .secondary-button {
+        height: 29px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 7px;
+        background: linear-gradient(180deg, rgba(39, 44, 61, 0.92), rgba(27, 31, 42, 0.92));
+        color: var(--text);
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 680;
+        transition:
+          background 120ms ease,
+          border-color 120ms ease,
+          color 120ms ease;
+      }
+
+      .secondary-button:hover {
+        border-color: rgba(124, 77, 255, 0.62);
+        background: linear-gradient(180deg, rgba(45, 51, 70, 0.96), rgba(31, 36, 49, 0.96));
+        color: #d9d0ff;
+      }
+
+      .settings-status {
+        margin-bottom: 10px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 7px 9px;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .settings-status.success {
+        border-color: rgba(32, 201, 151, 0.35);
+        background: rgba(32, 201, 151, 0.1);
+        color: var(--success);
+      }
+
+      .settings-status.error {
+        border-color: rgba(255, 92, 92, 0.35);
+        background: rgba(255, 92, 92, 0.1);
+        color: var(--serious);
+      }
+
+      .frame-summary {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0;
+        background: rgba(255, 255, 255, 0.055);
+      }
+
+      .summary-item {
+        min-width: 0;
+        background: rgba(23, 26, 34, 0.8);
+        padding: 7px 9px;
+        box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.045);
+      }
+
+      .summary-label {
+        margin-bottom: 3px;
+        color: var(--weak);
+        font-size: 11px;
+      }
+
+      .summary-value {
+        overflow-wrap: anywhere;
+        color: var(--text);
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.25;
+      }
+
+      .messages {
+        display: grid;
+        gap: 6px;
+        padding: 7px 9px 8px;
+      }
+
+      .category-nav {
+        display: grid;
+        gap: 6px;
+        padding: 8px;
+      }
+
+      .category-grid {
+        display: grid;
+        gap: 6px;
+      }
+
+      .category-item {
+        display: grid;
+        grid-template-columns: 24px minmax(0, 1fr) auto 14px;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        min-width: 0;
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 8px;
+        background: rgba(18, 21, 29, 0.72);
+        color: var(--text);
+        cursor: pointer;
+        padding: 7px 8px;
+        text-align: left;
+        box-shadow: var(--inner-highlight);
+        transition:
+          border-color 120ms ease,
+          background 120ms ease,
+          transform 120ms ease;
+      }
+
+      .category-item:hover {
+        border-color: rgba(124, 77, 255, 0.4);
+        background: rgba(32, 36, 50, 0.82);
+        transform: translateY(-1px);
+      }
+
+      .category-icon {
+        display: inline-grid;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        border: 1px solid rgba(124, 77, 255, 0.28);
+        border-radius: 7px;
+        background: rgba(124, 77, 255, 0.12);
+        color: #d9d0ff;
+        font-size: 12px;
+        font-weight: 760;
+      }
+
+      .category-name {
+        min-width: 0;
+        overflow: hidden;
+        color: var(--text);
+        font-size: 12px;
+        font-weight: 680;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .category-count {
+        min-width: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 999px;
+        background: rgba(15, 17, 23, 0.72);
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 680;
+        line-height: 1.5;
+        padding: 1px 7px;
+        text-align: center;
+      }
+
+      .category-arrow {
+        color: var(--weak);
+        font-size: 13px;
+        line-height: 1;
+      }
+
+      .message {
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 7px;
+        padding: 7px 8px;
+        line-height: 1.42;
+        box-shadow: var(--inner-highlight);
+      }
+
+      .message.success {
+        border-color: rgba(32, 201, 151, 0.34);
+        background: rgba(32, 201, 151, 0.1);
+        color: var(--success);
+      }
+
+      .message.warning {
+        border-color: rgba(244, 179, 94, 0.35);
+        background: rgba(244, 179, 94, 0.1);
+        color: var(--warning);
+      }
+
+      .message.error {
+        border-color: rgba(255, 92, 92, 0.34);
+        background: rgba(255, 92, 92, 0.1);
+        color: var(--serious);
+      }
+
+      .message.info {
+        border-color: rgba(124, 77, 255, 0.32);
+        background: rgba(124, 77, 255, 0.1);
+        color: var(--accent);
+      }
+
+      .message-title {
+        font-weight: 680;
+      }
+
+      .issue-overview {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 5px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+        background: rgba(23, 26, 34, 0.62);
+        padding: 7px 8px;
+      }
+
+      .issue-stat {
+        min-width: 0;
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 7px;
+        background: rgba(18, 21, 29, 0.72);
+        padding: 6px 7px;
+        box-shadow: var(--inner-highlight);
+      }
+
+      .issue-stat-value {
+        margin-bottom: 2px;
+        color: var(--text);
+        font-size: 13px;
+        font-weight: 760;
+        line-height: 1.1;
+      }
+
+      .issue-stat-label {
+        color: var(--weak);
+        font-size: 11px;
+      }
+
+      .issue-list {
+        display: grid;
+        gap: 6px;
+        max-height: min(360px, 48vh);
+        overflow-x: hidden;
+        overflow-y: auto;
+        padding: 8px 8px 9px;
+      }
+
+      .issue-item,
+      .ignored-item {
+        border: 1px solid rgba(255, 255, 255, 0.075);
+        border-radius: 8px;
+        background: rgba(18, 21, 29, 0.76);
+        padding: 7px 8px;
+        box-shadow:
+          inset 2px 0 0 rgba(124, 77, 255, 0.26),
+          inset 0 1px 0 rgba(255, 255, 255, 0.045),
+          0 6px 14px rgba(0, 0, 0, 0.14);
+      }
+
+      .issue-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        margin-bottom: 4px;
+      }
+
+      .issue-type {
+        min-width: 0;
+        overflow-wrap: anywhere;
+        color: var(--text);
+        font-size: 12px;
+        font-weight: 720;
+        line-height: 1.3;
+      }
+
+      .severity-badge {
+        flex: 0 0 auto;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        padding: 1px 7px;
+        font-size: 11px;
+        font-weight: 680;
+        line-height: 1.45;
+      }
+
+      .severity-badge.serious {
+        border-color: rgba(255, 92, 92, 0.34);
+        background: rgba(255, 92, 92, 0.1);
+        color: var(--serious);
+      }
+
+      .severity-badge.warning {
+        border-color: rgba(244, 179, 94, 0.32);
+        background: rgba(244, 179, 94, 0.1);
+        color: var(--warning);
+      }
+
+      .severity-badge.info {
+        border-color: rgba(32, 201, 151, 0.28);
+        background: rgba(32, 201, 151, 0.08);
+        color: var(--success);
+      }
+
+      .issue-row {
+        display: grid;
+        grid-template-columns: 54px minmax(0, 1fr);
+        gap: 7px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.34;
+        margin-top: 2px;
+      }
+
+      .issue-row strong {
+        min-width: 0;
+        color: var(--text);
+        font-weight: 620;
+        overflow-wrap: anywhere;
+      }
+
+      .issue-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 6px;
+        align-items: center;
+      }
+
+      .focus-button,
+      .ignore-button,
+      .restore-button,
+      .detail-button {
+        border: 1px solid rgba(255, 255, 255, 0.075);
+        border-radius: 6px;
+        background: linear-gradient(180deg, rgba(39, 44, 61, 0.86), rgba(26, 30, 40, 0.86));
+        color: var(--text);
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 650;
+        padding: 3px 8px;
+        min-height: 25px;
+        flex: 0 0 auto;
+        transition:
+          background 120ms ease,
+          border-color 120ms ease,
+          color 120ms ease;
+      }
+
+      .focus-button:hover,
+      .restore-button:hover,
+      .detail-button:hover {
+        border-color: rgba(255, 138, 61, 0.7);
+        background: linear-gradient(180deg, rgba(50, 55, 72, 0.95), rgba(35, 39, 52, 0.95));
+        color: var(--orange-hover);
+      }
+
+      .focus-button {
+        border-color: rgba(255, 138, 61, 0.62);
+        background:
+          linear-gradient(180deg, rgba(255, 138, 61, 0.17), rgba(255, 138, 61, 0.07)),
+          rgba(23, 26, 34, 0.76);
+        color: var(--orange);
+        box-shadow:
+          0 4px 10px rgba(255, 138, 61, 0.08),
+          inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      }
+
+      .ignore-button {
+        color: var(--muted);
+        font-weight: 500;
+        background: rgba(23, 27, 36, 0.72);
+      }
+
+      .ignore-button:hover {
+        border-color: var(--border);
+        background: rgba(34, 39, 53, 0.88);
+        color: var(--text);
+      }
+
+      .detail-button {
+        background: rgba(34, 39, 53, 0.82);
+        color: var(--muted);
+      }
+
+      .restore-button {
+        border-color: rgba(32, 201, 151, 0.38);
+        color: var(--success);
+      }
+
+      .issue-detail-block {
+        margin-top: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 7px;
+        background: rgba(32, 36, 50, 0.72);
+        padding: 7px 8px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .focus-status {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+        padding: 7px 9px;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .focus-status.success {
+        background: rgba(32, 201, 151, 0.1);
+        color: var(--success);
+      }
+
+      .focus-status.error {
+        background: rgba(255, 92, 92, 0.1);
+        color: var(--serious);
+      }
+
+      .ignored-section {
+        border-top: 1px solid rgba(255, 255, 255, 0.055);
+      }
+
+      .ignored-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: stretch;
+        background: var(--glass-2);
+        box-shadow: var(--inner-highlight);
+      }
+
+      .ignored-toggle {
+        display: grid;
+        grid-template-columns: 16px minmax(0, 1fr) auto;
+        gap: 7px;
+        align-items: center;
+        width: 100%;
+        border: 0;
+        background: transparent;
+        color: var(--text);
+        cursor: pointer;
+        padding: 8px 10px;
+        text-align: left;
+        transition: background 120ms ease;
+      }
+
+      .ignored-toggle:hover {
+        background: rgba(39, 44, 61, 0.9);
+      }
+
+      .restore-all-button {
+        align-self: center;
+        margin-right: 8px;
+        border: 1px solid rgba(32, 201, 151, 0.34);
+        border-radius: 999px;
+        background: rgba(32, 201, 151, 0.08);
+        color: var(--success);
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 650;
+        line-height: 1.4;
+        padding: 3px 8px;
+        transition:
+          background 120ms ease,
+          border-color 120ms ease,
+          color 120ms ease;
+      }
+
+      .restore-all-button:hover {
+        border-color: rgba(32, 201, 151, 0.58);
+        background: rgba(32, 201, 151, 0.14);
+        color: #5ee0b8;
+      }
+
+      .ignored-title {
+        font-weight: 720;
+      }
+
+      .ignored-count {
+        color: var(--muted);
+        font-size: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.075);
+        border-radius: 999px;
+        padding: 1px 7px;
+      }
+
+      .ignored-body {
+        display: grid;
+        gap: 6px;
+        padding: 8px;
+      }
+
+      .typography-overview {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+        padding: 8px 10px;
+        color: var(--muted);
+        line-height: 1.45;
+      }
+
+      .typography-tree {
+        max-height: 390px;
+        overflow: auto;
+        padding: 5px 10px 9px;
+      }
+
+      .group {
+        border-top: 1px solid rgba(255, 255, 255, 0.045);
+      }
+
+      .group:first-child {
+        border-top: 0;
+      }
+
+      .group-body {
+        margin-left: 15px;
+      }
+
+      .toggle-row {
+        display: grid;
+        grid-template-columns: 16px minmax(0, 1fr) auto;
+        gap: 7px;
+        align-items: center;
+        width: 100%;
+        min-height: 30px;
+        border: 0;
+        background: transparent;
+        color: var(--text);
+        cursor: pointer;
+        padding: 6px 0;
+        text-align: left;
+        transition: color 120ms ease;
+      }
+
+      .toggle-row:hover .group-title {
+        color: #d9d0ff;
+      }
+
+      .arrow {
+        color: #8c94a6;
+        font-size: 12px;
+        line-height: 1;
+      }
+
+      .group-title {
+        min-width: 0;
+        overflow-wrap: anywhere;
+        font-weight: 680;
+      }
+
+      .group-count {
+        color: var(--muted);
+        font-size: 12px;
+        white-space: nowrap;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 999px;
+        padding: 1px 6px;
+        background: rgba(18, 21, 29, 0.55);
+      }
+
+      .toggle-row.level-size {
+        min-height: 27px;
+        padding: 4px 0;
+      }
+
+      .layer-list {
+        display: grid;
+        gap: 6px;
+        margin: 0 0 7px 14px;
+        padding: 0;
+      }
+
+      .layer-row {
+        border-left: 2px solid rgba(124, 77, 255, 0.35);
+        padding: 2px 0 2px 8px;
+        list-style: none;
+      }
+
+      .layer-name {
+        margin-bottom: 4px;
+        overflow-wrap: anywhere;
+        font-weight: 650;
+      }
+
+      .layer-meta {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      ::selection {
+        background: rgba(124, 77, 255, 0.3);
+      }
+
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: rgba(18, 21, 29, 0.5);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        border: 2px solid rgba(18, 21, 29, 0.5);
+        border-radius: 999px;
+        background: rgba(115, 124, 140, 0.36);
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(167, 175, 190, 0.48);
+      }
+
+      @media (max-width: 360px) {
+        .frame-summary,
+        .issue-overview,
+        .settings-actions {
+          grid-template-columns: 1fr;
+        }
+
+        .toggle-row,
+        .ignored-toggle {
+          grid-template-columns: 18px minmax(0, 1fr);
+        }
+
+        .group-count,
+        .ignored-count {
+          grid-column: 2;
+          white-space: normal;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <section class="header">
+        <h1>Mobile UI QA Inspector</h1>
+        <p class="feedback">使用反馈：小红书 ID 1693560303</p>
+        <p class="status" id="statusText">请选择一个移动端 Frame，然后点击「开始检查」。</p>
+      </section>
+
+      <section class="content-scroll">
+      <section class="panel settings-panel">
+        <button class="settings-toggle" id="settingsToggle" type="button" aria-expanded="false">
+          <span class="arrow" id="settingsArrow">▶</span>
+          <span class="settings-title">检查规范设置</span>
+        </button>
+        <div class="settings-body" id="settingsBody" hidden>
+          <div class="settings-status" id="settingsStatus" hidden></div>
+          <div class="settings-grid">
+            <label class="setting-item">
+              <span class="setting-label">页面左右边距</span>
+              <input class="setting-input" id="pageHorizontalMarginInput" type="number" min="0" step="1" />
+              <span class="setting-description">用于后续检查页面主要内容距离画板左右边缘的安全边距。常见值为 12px 或 16px。</span>
+            </label>
+            <label class="setting-item">
+              <span class="setting-label">最小弱化信息字号</span>
+              <input class="setting-input" id="minTinyTextSizeInput" type="number" min="1" step="1" />
+              <span class="setting-description">低于该字号将作为严重可读性风险提示。</span>
+            </label>
+            <label class="setting-item">
+              <span class="setting-label">小字号提醒阈值</span>
+              <input class="setting-input" id="smallTextWarningSizeInput" type="number" min="1" step="1" />
+              <span class="setting-description">大于等于最小弱化信息字号且低于该值时，作为小字号使用提醒。</span>
+            </label>
+            <label class="setting-item">
+              <span class="setting-label">正文参考字号</span>
+              <input class="setting-input" id="bodyTextReferenceSizeInput" type="number" min="1" step="1" />
+              <span class="setting-description">用于后续判断主要正文阅读字号的参考值。当前阶段只保存设置，不做复杂语义判断。</span>
+            </label>
+            <label class="setting-item">
+              <span class="setting-label">基础间距单位</span>
+              <input class="setting-input" id="spacingBaseUnitInput" type="number" min="1" step="1" />
+              <span class="setting-description">用于后续检查间距是否符合基础倍数关系。</span>
+            </label>
+            <label class="setting-item">
+              <span class="setting-label">间距误差容忍</span>
+              <input class="setting-input" id="spacingToleranceInput" type="number" min="0" step="1" />
+              <span class="setting-description">用于后续检查间距时允许的像素误差，例如 16px 目标值下，15px / 17px 可视为可接受。</span>
+            </label>
+          </div>
+          <div class="settings-actions">
+            <button class="secondary-button" id="saveSettingsButton" type="button">保存设置</button>
+            <button class="secondary-button" id="resetSettingsButton" type="button">恢复默认</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="result" id="result">
+        <section class="panel">
+          <p class="empty">检查结果会显示在这里。</p>
+        </section>
+      </section>
+      </section>
+
+      <section class="actions">
+        <button id="startButton" type="button">开始检查</button>
+      </section>
+    </main>
+
+    <script>
+      const DEFAULT_QA_SETTINGS = {
+        settingsVersion: 2,
+        frameWidth: 375,
+        pageHorizontalMargin: 16,
+        minTinyTextSize: 10,
+        smallTextWarningSize: 12,
+        bodyTextReferenceSize: 14,
+        spacingBaseUnit: 2,
+        spacingTolerance: 1
+      };
+
+      const startButton = document.getElementById("startButton");
+      const statusText = document.getElementById("statusText");
+      const resultContainer = document.getElementById("result");
+      const settingsToggle = document.getElementById("settingsToggle");
+      const settingsBody = document.getElementById("settingsBody");
+      const settingsArrow = document.getElementById("settingsArrow");
+      const settingsStatus = document.getElementById("settingsStatus");
+      const saveSettingsButton = document.getElementById("saveSettingsButton");
+      const resetSettingsButton = document.getElementById("resetSettingsButton");
+
+      let groupIdCounter = 0;
+      let currentSettings = { ...DEFAULT_QA_SETTINGS };
+      let lastInspectionResult = null;
+
+      startButton.addEventListener("click", () => {
+        startButton.disabled = true;
+        statusText.textContent = "正在读取当前选中的 Frame...";
+        resultContainer.innerHTML = '<section class="panel"><p class="empty">检查中，请稍候。</p></section>';
+
+        parent.postMessage(
+          {
+            pluginMessage: {
+              type: "start-inspection"
+            }
+          },
+          "*"
+        );
+      });
+
+      settingsToggle.addEventListener("click", () => {
+        const willOpen = settingsBody.hidden;
+        settingsBody.hidden = !willOpen;
+        settingsToggle.setAttribute("aria-expanded", String(willOpen));
+        settingsArrow.textContent = willOpen ? "▼" : "▶";
+      });
+
+      saveSettingsButton.addEventListener("click", () => {
+        parent.postMessage(
+          {
+            pluginMessage: {
+              type: "save-settings",
+              settings: collectSettings()
+            }
+          },
+          "*"
+        );
+      });
+
+      resetSettingsButton.addEventListener("click", () => {
+        parent.postMessage(
+          {
+            pluginMessage: {
+              type: "reset-settings"
+            }
+          },
+          "*"
+        );
+      });
+
+      resultContainer.addEventListener("click", (event) => {
+        const eventTarget = event.target instanceof Element ? event.target : null;
+
+        if (!eventTarget) {
+          return;
+        }
+
+        const scrollButton = eventTarget.closest("[data-scroll-target]");
+
+        if (scrollButton) {
+          scrollToContentSection(scrollButton.dataset.scrollTarget);
+          return;
+        }
+
+        const detailButton = eventTarget.closest("[data-detail-target]");
+
+        if (detailButton) {
+          const detailTarget = document.getElementById(detailButton.dataset.detailTarget);
+
+          if (detailTarget) {
+            const willOpen = detailTarget.hidden;
+            detailTarget.hidden = !willOpen;
+            detailButton.textContent = willOpen ? "收起" : "详情";
+          }
+
+          return;
+        }
+
+        const ignoreButton = eventTarget.closest("[data-ignore-key]");
+
+        if (ignoreButton) {
+          const ignoreKey = ignoreButton.dataset.ignoreKey;
+
+          if (ignoreKey) {
+            applyLocalIgnoreChange(ignoreKey, true);
+            parent.postMessage(
+              {
+                pluginMessage: {
+                  type: "ignore-issue",
+                  ignoreKey
+                }
+              },
+              "*"
+            );
+          }
+
+          return;
+        }
+
+        const restoreAllButton = eventTarget.closest("[data-restore-all-ignored]");
+
+        if (restoreAllButton) {
+          restoreAllIgnoredIssues();
+          return;
+        }
+
+        const restoreButton = eventTarget.closest("[data-restore-ignore-key]");
+
+        if (restoreButton) {
+          const ignoreKey = restoreButton.dataset.restoreIgnoreKey;
+
+          if (ignoreKey) {
+            applyLocalIgnoreChange(ignoreKey, false);
+            parent.postMessage(
+              {
+                pluginMessage: {
+                  type: "restore-issue",
+                  ignoreKey
+                }
+              },
+              "*"
+            );
+          }
+
+          return;
+        }
+
+        const focusButton = eventTarget.closest("[data-focus-node-id]");
+
+        if (focusButton) {
+          const nodeId = focusButton.dataset.focusNodeId;
+
+          if (nodeId) {
+            setFocusStatus("正在定位图层...", "success");
+            parent.postMessage(
+              {
+                pluginMessage: {
+                  type: "focus-node",
+                  nodeId
+                }
+              },
+              "*"
+            );
+          }
+
+          return;
+        }
+
+        const toggle = eventTarget.closest("[data-toggle-target]");
+
+        if (!toggle) {
+          return;
+        }
+
+        const target = document.getElementById(toggle.dataset.toggleTarget);
+
+        if (!target) {
+          return;
+        }
+
+        const willOpen = target.hidden;
+        target.hidden = !willOpen;
+        toggle.setAttribute("aria-expanded", String(willOpen));
+        toggle.querySelector(".arrow").textContent = willOpen ? "▼" : "▶";
+      });
+
+      window.onmessage = (event) => {
+        const message = event.data.pluginMessage;
+
+        if (!message) {
+          return;
+        }
+
+        if (message.type === "plugin-ready") {
+          statusText.textContent = message.message;
+          return;
+        }
+
+        if (message.type === "settings-loaded") {
+          currentSettings = message.settings;
+          populateSettings(currentSettings);
+          return;
+        }
+
+        if (message.type === "settings-saved") {
+          currentSettings = message.settings;
+          populateSettings(currentSettings);
+          setSettingsStatus(message.message || "设置已保存", "success");
+          return;
+        }
+
+        if (message.type === "settings-reset") {
+          currentSettings = message.settings;
+          populateSettings(currentSettings);
+          setSettingsStatus(message.message || "已恢复默认设置", "success");
+          return;
+        }
+
+        if (message.type === "settings-error") {
+          currentSettings = message.settings || DEFAULT_QA_SETTINGS;
+          populateSettings(currentSettings);
+          setSettingsStatus(message.message || "设置处理失败，已回退默认值。", "error");
+          return;
+        }
+
+        startButton.disabled = false;
+
+        if (message.type === "inspection-error") {
+          statusText.textContent = "检查未完成。";
+          lastInspectionResult = null;
+          renderMessages(message.messages);
+          return;
+        }
+
+        if (message.type === "inspection-result") {
+          statusText.textContent = "检查完成。";
+          lastInspectionResult = normalizeInspectionResult(message.result);
+          renderResult(lastInspectionResult);
+          return;
+        }
+
+        if (message.type === "focus-node-result") {
+          setFocusStatus(message.message, message.success ? "success" : "error");
+        }
+      };
+
+      requestSettings();
+      populateSettings(currentSettings);
+
+      function requestSettings() {
+        parent.postMessage(
+          {
+            pluginMessage: {
+              type: "get-settings"
+            }
+          },
+          "*"
+        );
+      }
+
+      function renderResult(result) {
+        groupIdCounter = 0;
+        resultContainer.innerHTML =
+          createFrameSummaryHtml(result) +
+          createIssueCategoryNavHtml(result) +
+          createIssueSectionHtml({
+            sectionId: "typography-issues-section",
+            title: "文字规范问题",
+            issues: result.typographyIssues || [],
+            summary: result.typographyIssueSummary,
+            emptyText: "未发现明显文字规范问题。"
+          }) +
+          createIssueSectionHtml({
+            sectionId: "spacing-issues-section",
+            title: "间距规范问题",
+            issues: result.spacingIssues || [],
+            summary: result.spacingIssueSummary,
+            emptyText: "未发现明显间距规范问题。"
+          }) +
+          createIssueSectionHtml({
+            sectionId: "radius-issues-section",
+            title: "圆角规范问题",
+            issues: result.radiusIssues || [],
+            summary: result.radiusIssueSummary,
+            emptyText: "未发现明显圆角规范问题。"
+          }) +
+          createIssueSectionHtml({
+            sectionId: "alignment-issues-section",
+            title: "对齐规范问题",
+            issues: result.alignmentIssues || [],
+            summary: result.alignmentIssueSummary,
+            emptyText: "未发现明显对齐规范问题。"
+          }) +
+          createGlobalIgnoredIssueSectionHtml(getAllIgnoredIssues(result)) +
+          createTypographySectionHtml(result);
+      }
+
+      function renderMessages(messages) {
+        resultContainer.innerHTML = `
+          <section class="panel">
+            ${createMessagesHtml(messages)}
+          </section>
+        `;
+      }
+
+      function normalizeInspectionResult(result) {
+        const nextResult = {
+          ...(result || {})
+        };
+        const issueSections = [
+          {
+            activeKey: "typographyIssues",
+            ignoredKey: "ignoredTypographyIssues",
+            summaryKey: "typographyIssueSummary"
+          },
+          {
+            activeKey: "spacingIssues",
+            ignoredKey: "ignoredSpacingIssues",
+            summaryKey: "spacingIssueSummary"
+          },
+          {
+            activeKey: "radiusIssues",
+            ignoredKey: "ignoredRadiusIssues",
+            summaryKey: "radiusIssueSummary"
+          },
+          {
+            activeKey: "alignmentIssues",
+            ignoredKey: "ignoredAlignmentIssues",
+            summaryKey: "alignmentIssueSummary"
+          }
+        ];
+
+        issueSections.forEach((section) => {
+          const activeIssues = normalizeIssueArray(nextResult[section.activeKey]);
+          const ignoredIssues = normalizeIssueArray(nextResult[section.ignoredKey]);
+
+          nextResult[section.activeKey] = activeIssues;
+          nextResult[section.ignoredKey] = ignoredIssues;
+          nextResult[section.summaryKey] = createLocalIssueSummary(activeIssues);
+        });
+
+        nextResult.messages = Array.isArray(nextResult.messages) ? nextResult.messages : [];
+        nextResult.textLayers = Array.isArray(nextResult.textLayers) ? nextResult.textLayers : [];
+        nextResult.typographyGroups = Array.isArray(nextResult.typographyGroups) ? nextResult.typographyGroups : [];
+
+        return nextResult;
+      }
+
+      function normalizeIssueArray(value) {
+        return Array.isArray(value) ? value.filter(Boolean) : [];
+      }
+
+      function scrollToContentSection(sectionId) {
+        if (!sectionId) {
+          return;
+        }
+
+        const target = document.getElementById(sectionId);
+
+        if (!target) {
+          return;
+        }
+
+        target.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }
+
+      function applyLocalIgnoreChange(ignoreKey, shouldIgnore) {
+        if (!lastInspectionResult) {
+          return;
+        }
+
+        const nextResult = { ...lastInspectionResult };
+        const issueSections = [
+          {
+            activeKey: "typographyIssues",
+            ignoredKey: "ignoredTypographyIssues",
+            summaryKey: "typographyIssueSummary"
+          },
+          {
+            activeKey: "spacingIssues",
+            ignoredKey: "ignoredSpacingIssues",
+            summaryKey: "spacingIssueSummary"
+          },
+          {
+            activeKey: "radiusIssues",
+            ignoredKey: "ignoredRadiusIssues",
+            summaryKey: "radiusIssueSummary"
+          },
+          {
+            activeKey: "alignmentIssues",
+            ignoredKey: "ignoredAlignmentIssues",
+            summaryKey: "alignmentIssueSummary"
+          }
+        ];
+        let changed = false;
+
+        issueSections.forEach((section) => {
+          const activeIssues = [...(nextResult[section.activeKey] || [])];
+          const ignoredIssues = [...(nextResult[section.ignoredKey] || [])];
+
+          if (shouldIgnore) {
+            const issueIndex = activeIssues.findIndex((issue) => issueMatchesIgnoreKey(issue, ignoreKey));
+
+            if (issueIndex >= 0) {
+              const issue = activeIssues.splice(issueIndex, 1)[0];
+              if (!ignoredIssues.some((ignoredIssue) => issueMatchesIgnoreKey(ignoredIssue, getIssueIgnoreId(issue)))) {
+                ignoredIssues.unshift(issue);
+              }
+              changed = true;
+            }
+          } else {
+            const issueIndex = ignoredIssues.findIndex((issue) => issueMatchesIgnoreKey(issue, ignoreKey));
+
+            if (issueIndex >= 0) {
+              const issue = ignoredIssues.splice(issueIndex, 1)[0];
+              if (!activeIssues.some((activeIssue) => issueMatchesIgnoreKey(activeIssue, getIssueIgnoreId(issue)))) {
+                activeIssues.unshift(issue);
+              }
+              changed = true;
+            }
+          }
+
+          nextResult[section.activeKey] = activeIssues;
+          nextResult[section.ignoredKey] = ignoredIssues;
+          nextResult[section.summaryKey] = createLocalIssueSummary(activeIssues);
+        });
+
+        if (!changed) {
+          return;
+        }
+
+        lastInspectionResult = nextResult;
+        renderResult(nextResult);
+      }
+
+      function restoreAllIgnoredIssues() {
+        if (!lastInspectionResult) {
+          return;
+        }
+
+        const ignoredIssues = getAllIgnoredIssues(lastInspectionResult);
+        const ignoreKeys = Array.from(new Set(
+          ignoredIssues
+            .map((issue) => getIssueIgnoreId(issue))
+            .filter(Boolean)
+        ));
+
+        if (!ignoreKeys.length) {
+          return;
+        }
+
+        const nextResult = { ...lastInspectionResult };
+        const issueSections = [
+          {
+            activeKey: "typographyIssues",
+            ignoredKey: "ignoredTypographyIssues",
+            summaryKey: "typographyIssueSummary"
+          },
+          {
+            activeKey: "spacingIssues",
+            ignoredKey: "ignoredSpacingIssues",
+            summaryKey: "spacingIssueSummary"
+          },
+          {
+            activeKey: "radiusIssues",
+            ignoredKey: "ignoredRadiusIssues",
+            summaryKey: "radiusIssueSummary"
+          },
+          {
+            activeKey: "alignmentIssues",
+            ignoredKey: "ignoredAlignmentIssues",
+            summaryKey: "alignmentIssueSummary"
+          }
+        ];
+
+        issueSections.forEach((section) => {
+          const activeIssues = normalizeIssueArray(nextResult[section.activeKey]);
+          const ignoredSectionIssues = normalizeIssueArray(nextResult[section.ignoredKey]);
+
+          ignoredSectionIssues.forEach((issue) => {
+            if (!activeIssues.some((activeIssue) => issueMatchesIgnoreKey(activeIssue, getIssueIgnoreId(issue)))) {
+              activeIssues.unshift(issue);
+            }
+          });
+
+          nextResult[section.activeKey] = activeIssues;
+          nextResult[section.ignoredKey] = [];
+          nextResult[section.summaryKey] = createLocalIssueSummary(activeIssues);
+        });
+
+        lastInspectionResult = nextResult;
+        renderResult(nextResult);
+
+        ignoreKeys.forEach((ignoreKey) => {
+          parent.postMessage(
+            {
+              pluginMessage: {
+                type: "restore-issue",
+                ignoreKey
+              }
+            },
+            "*"
+          );
+        });
+      }
+
+      function createLocalIssueSummary(issues) {
+        const safeIssues = normalizeIssueArray(issues);
+
+        return {
+          total: safeIssues.length,
+          serious: safeIssues.filter((issue) => issue.severity === "serious").length,
+          warning: safeIssues.filter((issue) => issue.severity === "warning").length,
+          info: safeIssues.filter((issue) => issue.severity === "info").length
+        };
+      }
+
+      function getIssueIgnoreId(issue) {
+        return issue.stableId || issue.ignoreKey;
+      }
+
+      function issueMatchesIgnoreKey(issue, ignoreKey) {
+        if (!issue || !ignoreKey) {
+          return false;
+        }
+
+        if (issue.stableId === ignoreKey || issue.ignoreKey === ignoreKey) {
+          return true;
+        }
+
+        return Array.isArray(issue.ignoreKeyAliases) && issue.ignoreKeyAliases.includes(ignoreKey);
+      }
+
+      function createFrameSummaryHtml(result) {
+        return `
+          <section class="panel" id="frame-section">
+            <div class="panel-header">
+              <h2>Frame 检查结果</h2>
+            </div>
+            <div class="frame-summary">
+              <div class="summary-item">
+                <div class="summary-label">Frame 名称</div>
+                <div class="summary-value">${escapeHtml(result.frameName)}</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-label">尺寸</div>
+                <div class="summary-value">${result.width} × ${result.height}</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-label">子图层数量</div>
+                <div class="summary-value">${result.childCount}</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-label">页面类型</div>
+                <div class="summary-value">${getPageTypeLabel(result.pageType)}</div>
+              </div>
+            </div>
+            ${createMessagesHtml(result.messages)}
+          </section>
+        `;
+      }
+
+      function createIssueCategoryNavHtml(result) {
+        const items = [
+          {
+            icon: "T",
+            name: "Typography / 文字",
+            count: getIssueCount(result.typographyIssues),
+            target: "typography-issues-section"
+          },
+          {
+            icon: "↔",
+            name: "Spacing / 间距",
+            count: getIssueCount(result.spacingIssues),
+            target: "spacing-issues-section"
+          },
+          {
+            icon: "◜",
+            name: "Radius / 圆角",
+            count: getIssueCount(result.radiusIssues),
+            target: "radius-issues-section"
+          },
+          {
+            icon: "≡",
+            name: "Alignment / 对齐",
+            count: getIssueCount(result.alignmentIssues),
+            target: "alignment-issues-section"
+          }
+        ];
+
+        return `
+          <section class="panel category-nav-panel">
+            <div class="panel-header">
+              <h2>问题分类</h2>
+            </div>
+            <div class="category-nav">
+              <div class="category-grid">
+                ${items.map(createCategoryItemHtml).join("")}
+              </div>
+            </div>
+          </section>
+        `;
+      }
+
+      function createCategoryItemHtml(item) {
+        return `
+          <button class="category-item" type="button" data-scroll-target="${escapeHtml(item.target)}">
+            <span class="category-icon">${escapeHtml(item.icon)}</span>
+            <span class="category-name">${escapeHtml(item.name)}</span>
+            <span class="category-count">${escapeHtml(item.count)}</span>
+            <span class="category-arrow">›</span>
+          </button>
+        `;
+      }
+
+      function getIssueCount(issues) {
+        return Array.isArray(issues) ? issues.length : 0;
+      }
+
+      function createIssueSectionHtml({ sectionId, title, issues, summary, emptyText }) {
+        const safeIssues = normalizeIssueArray(issues);
+        const safeSummary = createLocalIssueSummary(safeIssues);
+
+        return `
+          <section class="panel" id="${escapeHtml(sectionId || "")}">
+            <div class="panel-header">
+              <h2>${escapeHtml(title)}</h2>
+            </div>
+            <div class="focus-status" hidden></div>
+            <div class="issue-overview">
+              ${createIssueStatHtml("问题总数", safeSummary.total)}
+              ${createIssueStatHtml("严重", safeSummary.serious)}
+              ${createIssueStatHtml("提醒", safeSummary.warning)}
+              ${createIssueStatHtml("轻提示", safeSummary.info)}
+            </div>
+            ${
+              safeIssues.length
+                ? `<div class="issue-list">${safeIssues.map(createIssueItemHtml).join("")}</div>`
+                : `<p class="empty">${escapeHtml(emptyText)}</p>`
+            }
+          </section>
+        `;
+      }
+
+      function createIssueStatHtml(label, value) {
+        return `
+          <div class="issue-stat">
+            <div class="issue-stat-value">${escapeHtml(value)}</div>
+            <div class="issue-stat-label">${escapeHtml(label)}</div>
+          </div>
+        `;
+      }
+
+      function createIssueItemHtml(issue) {
+        const detailId = createGroupId("issue-detail");
+        const hasDetail = Boolean(issue.detail || issue.textPreview || issue.relatedLayerName);
+
+        return `
+          <article class="issue-item">
+            <div class="issue-header">
+              <div class="issue-type">${escapeHtml(getIssueTitle(issue))}</div>
+              <div class="severity-badge ${issue.severity}">${escapeHtml(getIssueSeverityLabel(issue.severity))}</div>
+            </div>
+            ${createIssueRowHtml("图层", issue.layerName || "页面整体")}
+            ${issue.currentValue ? createIssueRowHtml("当前值", issue.currentValue) : ""}
+            ${createIssueRowHtml("建议", issue.suggestion)}
+            <div class="issue-actions">
+              ${
+                issue.layerId
+                  ? `<button class="focus-button" type="button" data-focus-node-id="${escapeHtml(issue.layerId)}">定位图层</button>`
+                  : ""
+              }
+              <button class="ignore-button" type="button" data-ignore-key="${escapeHtml(getIssueIgnoreId(issue))}">忽略</button>
+              ${hasDetail ? `<button class="detail-button" type="button" data-detail-target="${detailId}">详情</button>` : ""}
+            </div>
+            ${hasDetail ? createIssueDetailHtml(issue, detailId) : ""}
+          </article>
+        `;
+      }
+
+      function createIssueRowHtml(label, value) {
+        return `
+          <div class="issue-row">
+            <span>${escapeHtml(label)}</span>
+            <strong>${escapeHtml(value)}</strong>
+          </div>
+        `;
+      }
+
+      function createIssueDetailHtml(issue, detailId) {
+        return `
+          <div class="issue-detail-block" id="${detailId}" hidden>
+            ${issue.detail ? `<div>${escapeHtml(issue.detail)}</div>` : ""}
+            ${issue.textPreview ? `<div>文本预览：${escapeHtml(truncateText(issue.textPreview, 20))}</div>` : ""}
+            ${issue.relatedLayerName ? `<div>相关图层：${escapeHtml(issue.relatedLayerName)}</div>` : ""}
+          </div>
+        `;
+      }
+
+      function getAllIgnoredIssues(result) {
+        return [
+          ...(result.ignoredTypographyIssues || []).map((issue) => ({ ...issue, sourceLabel: "文字" })),
+          ...(result.ignoredSpacingIssues || []).map((issue) => ({ ...issue, sourceLabel: "间距" })),
+          ...(result.ignoredRadiusIssues || []).map((issue) => ({ ...issue, sourceLabel: "圆角" })),
+          ...(result.ignoredAlignmentIssues || []).map((issue) => ({ ...issue, sourceLabel: "对齐" }))
+        ];
+      }
+
+      function createGlobalIgnoredIssueSectionHtml(ignoredIssues) {
+        const bodyId = createGroupId("ignored");
+
+        return `
+          <section class="panel ignored-section">
+            <div class="ignored-header">
+              <button class="ignored-toggle" type="button" data-toggle-target="${bodyId}" aria-expanded="false">
+                <span class="arrow">▶</span>
+                <span class="ignored-title">已忽略问题</span>
+                <span class="ignored-count">已忽略 ${ignoredIssues.length}</span>
+              </button>
+              ${
+                ignoredIssues.length
+                  ? '<button class="restore-all-button" type="button" data-restore-all-ignored="true">全部恢复</button>'
+                  : ""
+              }
+            </div>
+            <div class="ignored-body" id="${bodyId}" hidden>
+              ${
+                ignoredIssues.length
+                  ? ignoredIssues.map(createIgnoredIssueItemHtml).join("")
+                  : '<p class="empty">暂无已忽略问题</p>'
+              }
+            </div>
+          </section>
+        `;
+      }
+
+      function createIgnoredIssueItemHtml(issue) {
+        return `
+          <article class="ignored-item">
+            <div class="issue-header">
+              <div class="issue-type">${issue.sourceLabel ? `<span>${escapeHtml(issue.sourceLabel)}</span> · ` : ""}${escapeHtml(getIssueTitle(issue))}</div>
+              <button class="restore-button" type="button" data-restore-ignore-key="${escapeHtml(getIssueIgnoreId(issue))}">恢复</button>
+            </div>
+            ${createIssueRowHtml("图层", issue.layerName || "页面整体")}
+            ${issue.currentValue ? createIssueRowHtml("当前值", issue.currentValue) : ""}
+          </article>
+        `;
+      }
+
+      function createTypographySectionHtml(result) {
+        const groups = result.typographyGroups || [];
+        const summary = result.typographySummary || {
+          totalTextLayers: result.textLayers ? result.textLayers.length : 0,
+          fontFamilyCount: 0,
+          fontSizeCount: 0,
+          fontWeightCount: 0
+        };
+
+        if (!summary.totalTextLayers) {
+          return `
+            <section class="panel">
+              <div class="panel-header">
+                <h2>文本图层扫描结果</h2>
+              </div>
+              <p class="empty">当前 Frame 内未发现文本图层。</p>
+            </section>
+          `;
+        }
+
+        return `
+          <section class="panel">
+            <div class="panel-header">
+              <h2>文本图层扫描结果</h2>
+            </div>
+            <div class="typography-overview">
+              共 ${summary.totalTextLayers} 个文本图层 / ${summary.fontFamilyCount} 种字体 / ${summary.fontSizeCount} 种字号 / ${summary.fontWeightCount} 种字重
+            </div>
+            <div class="typography-tree">
+              ${groups.map((group, index) => createFamilyGroupHtml(group, index === 0)).join("")}
+            </div>
+          </section>
+        `;
+      }
+
+      function createFamilyGroupHtml(group, isOpen) {
+        const bodyId = createGroupId("family");
+
+        return `
+          <div class="group family-group">
+            ${createToggleRowHtml({
+              bodyId,
+              title: group.fontFamily,
+              count: `${group.count} 个文本图层`,
+              levelClass: "level-family",
+              isOpen
+            })}
+            <div class="group-body" id="${bodyId}" ${isOpen ? "" : "hidden"}>
+              ${group.weights.map(createWeightGroupHtml).join("")}
+            </div>
+          </div>
+        `;
+      }
+
+      function createWeightGroupHtml(group) {
+        const bodyId = createGroupId("weight");
+
+        return `
+          <div class="group weight-group">
+            ${createToggleRowHtml({
+              bodyId,
+              title: createWeightLabel(group),
+              count: `${group.count} 个文本图层`,
+              levelClass: "level-weight",
+              isOpen: false
+            })}
+            <div class="group-body" id="${bodyId}" hidden>
+              ${group.sizes.map(createSizeGroupHtml).join("")}
+            </div>
+          </div>
+        `;
+      }
+
+      function createSizeGroupHtml(group) {
+        const bodyId = createGroupId("size");
+
+        return `
+          <div class="group size-group">
+            ${createToggleRowHtml({
+              bodyId,
+              title: formatFontSize(group.fontSize),
+              count: `${group.count} 个文本图层`,
+              levelClass: "level-size",
+              isOpen: false
+            })}
+            <div class="group-body" id="${bodyId}" hidden>
+              <ul class="layer-list">
+                ${group.layers.map(createLayerRowHtml).join("")}
+              </ul>
+            </div>
+          </div>
+        `;
+      }
+
+      function createToggleRowHtml({ bodyId, title, count, levelClass, isOpen }) {
+        return `
+          <button class="toggle-row ${levelClass}" type="button" data-toggle-target="${bodyId}" aria-expanded="${isOpen}">
+            <span class="arrow">${isOpen ? "▼" : "▶"}</span>
+            <span class="group-title">${escapeHtml(title)}</span>
+            <span class="group-count">${escapeHtml(count)}</span>
+          </button>
+        `;
+      }
+
+      function createLayerRowHtml(layer) {
+        return `
+          <li class="layer-row" data-layer-id="${escapeHtml(layer.id)}">
+            <div class="layer-name">图层名称：${escapeHtml(layer.name)}</div>
+            <div class="layer-meta">内容：${escapeHtml(truncateText(layer.text, 20))}</div>
+            <div class="layer-meta">坐标：x ${escapeHtml(layer.x)} / y ${escapeHtml(layer.y)}</div>
+            <div class="layer-meta">尺寸：${escapeHtml(layer.width)} × ${escapeHtml(layer.height)}</div>
+          </li>
+        `;
+      }
+
+      function createMessagesHtml(messages) {
+        return `
+          <div class="messages">
+            ${messages
+              .map(
+                (item) => `
+                  <div class="message ${item.severity}">
+                    <div class="message-title">${escapeHtml(item.title)}</div>
+                    ${item.description ? `<div>${escapeHtml(item.description)}</div>` : ""}
+                  </div>
+                `
+              )
+              .join("")}
+          </div>
+        `;
+      }
+
+      function collectSettings() {
+        return {
+          settingsVersion: DEFAULT_QA_SETTINGS.settingsVersion,
+          frameWidth: DEFAULT_QA_SETTINGS.frameWidth,
+          pageHorizontalMargin: readNumberInput("pageHorizontalMarginInput", DEFAULT_QA_SETTINGS.pageHorizontalMargin),
+          minTinyTextSize: readNumberInput("minTinyTextSizeInput", DEFAULT_QA_SETTINGS.minTinyTextSize),
+          smallTextWarningSize: readNumberInput("smallTextWarningSizeInput", DEFAULT_QA_SETTINGS.smallTextWarningSize),
+          bodyTextReferenceSize: readNumberInput("bodyTextReferenceSizeInput", DEFAULT_QA_SETTINGS.bodyTextReferenceSize),
+          spacingBaseUnit: readNumberInput("spacingBaseUnitInput", DEFAULT_QA_SETTINGS.spacingBaseUnit),
+          spacingTolerance: readNumberInput("spacingToleranceInput", DEFAULT_QA_SETTINGS.spacingTolerance)
+        };
+      }
+
+      function populateSettings(settings) {
+        const nextSettings = {
+          ...DEFAULT_QA_SETTINGS,
+          ...(settings || {}),
+          settingsVersion: DEFAULT_QA_SETTINGS.settingsVersion,
+          frameWidth: DEFAULT_QA_SETTINGS.frameWidth
+        };
+
+        setInputValue("pageHorizontalMarginInput", nextSettings.pageHorizontalMargin);
+        setInputValue("minTinyTextSizeInput", nextSettings.minTinyTextSize);
+        setInputValue("smallTextWarningSizeInput", nextSettings.smallTextWarningSize);
+        setInputValue("bodyTextReferenceSizeInput", nextSettings.bodyTextReferenceSize);
+        setInputValue("spacingBaseUnitInput", nextSettings.spacingBaseUnit);
+        setInputValue("spacingToleranceInput", nextSettings.spacingTolerance);
+      }
+
+      function setInputValue(id, value) {
+        const input = document.getElementById(id);
+
+        if (input) {
+          input.value = value;
+        }
+      }
+
+      function readNumberInput(id, fallback) {
+        const input = document.getElementById(id);
+        const value = input ? Number(input.value) : NaN;
+
+        return Number.isFinite(value) ? value : fallback;
+      }
+
+      function setSettingsStatus(message, status) {
+        settingsStatus.hidden = false;
+        settingsStatus.className = `settings-status ${status}`;
+        settingsStatus.textContent = message;
+      }
+
+      function createWeightLabel(group) {
+        const style = group.fontStyle || "Unknown";
+        const weight = group.fontWeight || "Unknown";
+
+        if (style === "Unknown" && weight === "Unknown") {
+          return "Unknown";
+        }
+
+        return `${style} / ${weight}`;
+      }
+
+      function formatFontSize(fontSize) {
+        return typeof fontSize === "number" ? `${fontSize}px` : String(fontSize);
+      }
+
+      function truncateText(value, maxLength) {
+        const text = String(value || "").replace(/\s+/g, " ").trim();
+
+        if (text.length <= maxLength) {
+          return text || "空文本";
+        }
+
+        return `${text.slice(0, maxLength)}...`;
+      }
+
+      function createGroupId(prefix) {
+        groupIdCounter += 1;
+        return `${prefix}-${groupIdCounter}`;
+      }
+
+      function getPageTypeLabel(pageType) {
+        const labels = {
+          standard: "标准移动端页面",
+          long: "移动端长页面",
+          "width-warning": "宽度不符合基准",
+          unknown: "未分类"
+        };
+
+        return labels[pageType] || "未分类";
+      }
+
+      function getIssueTitle(issue) {
+        return issue.title || getIssueTypeLabel(issue.type);
+      }
+
+      function getIssueTypeLabel(type) {
+        const labels = {
+          "font-size-below-minimum": "字号低于弱化信息下限",
+          "font-size-small-warning": "小字号使用提示",
+          "font-size-body-risk": "正文阅读字号偏小",
+          "mixed-text-style": "文本样式混合",
+          "too-many-font-families": "字体种类偏多",
+          "too-many-font-sizes": "字号层级偏多",
+          "too-many-font-weights": "字重种类偏多",
+          "spacing-not-multiple": "间距疑似不规整",
+          "spacing-edge-not-multiple": "边距不符合基础单位",
+          "spacing-edge-mismatch": "边距疑似不一致",
+          "radius-inconsistent": "圆角关系疑似不一致",
+          "radius-nesting-mismatch": "内外圆角关系疑似异常",
+          "alignment-left-offset": "左对齐疑似不一致",
+          "alignment-center-offset": "垂直中心疑似错位",
+          "alignment-similar-offset": "同类元素对齐疑似不一致"
+        };
+
+        return labels[type] || "规范问题";
+      }
+
+      function getIssueSeverityLabel(severity) {
+        const labels = {
+          serious: "严重",
+          warning: "提醒",
+          info: "轻提示"
+        };
+
+        return labels[severity] || "提醒";
+      }
+
+      function setFocusStatus(message, status) {
+        const focusStatusList = document.querySelectorAll(".focus-status");
+
+        if (!focusStatusList.length) {
+          return;
+        }
+
+        focusStatusList.forEach((focusStatus) => {
+          focusStatus.hidden = false;
+          focusStatus.className = `focus-status ${status}`;
+          focusStatus.textContent = message;
+        });
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+    </script>
+  </body>
+</html>
